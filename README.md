@@ -1,0 +1,3 @@
+# Hasami Shogi Game 
+
+
