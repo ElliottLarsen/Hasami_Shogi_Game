@@ -14,7 +14,7 @@ class HasamiShogiGame:
         Creates a new Hasami Shogi Game.  All data members are set to private.
         """
 
-        self._current_board = [[" ", 1, 2, 3, 4, 5, 6, 7, 8, 9], ["a", "R", "R", "R", "R", "R", "R", "R", "R", "R"],
+        self._current_board = [[" ", 1, 2, 3, 4, 5, 6, 7, 8, 9], ["a", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
         ["b", ".", ".", ".", ".", ".", ".", ".", ".", "."], ["c", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         ["d", ".", ".", ".", ".", ".", ".", ".", ".", "."], ["e", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         ["f", ".", ".", ".", ".", ".", ".", ".", ".", "."], ["g", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -134,5 +134,100 @@ class HasamiShogiGame:
             self._captured_orange_pieces += 1
         else:
             return self._invalid_message
+
+    def get_square_occupant(self, coord):
+        """
+        Takes a coordinate as a parameter and returns the current occupant (if any) of the square.  
+        """
+
+        coord = list(coord)
+        temp_list = []        
+        occupant = ""
+        x_coord = ""
+
+        for i in coord[1:]:
+            temp_list.append(i)
+        for j in temp_list:
+            x_coord += j
+        
+        x_coord = int(x_coord)
+        y_coord = coord[0].lower()
+
+        for row in self._current_board:
+            if row[0] == y_coord:
+                occupant = row[x_coord]
+
+        if occupant.lower() == "b":
+            return "BLUE"
+        elif occupant.lower() == "o":
+            return "ORANGE" 
+        else:
+            return "NONE"  
+
+    def set_square_occupant(self, coord, new_condition):
+        """
+        Takes the coordinate and new condition as parameters.  It will update the board based on the parameter 
+        passed to it.  For instance, if "e3, "B" are given as parameters, then e3 will be changed to B.
+        """   
+
+        coord = list(coord)
+        temp_list = []
+        x_coord = ""
+
+        for i in coord[1:]:
+            temp_list.append(i)
+        for j in temp_list:
+            x_coord += j
+
+        x_coord = int(x_coord)
+        y_coord = coord[0].lower()
+
+        for row in self._current_board:
+            if row[0] == y_coord:
+                row[x_coord] = new_condition 
+
+    def slice_coord(self, old_coord, new_coord):
+        """
+        Takes old and new coordinates and slices them into characters and integers.  This method returns a list 
+        consisting of x axis index of the coordinates (numeric representation) and y axis index of the 
+        coordinates (both character and numeric representations), which will be used by other methods.
+        """
+
+        old_coord = list(old_coord)
+        new_coord = list(new_coord)
+        row_char = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+        old_x_coord_list = []
+        new_x_coord_list = []
+        old_x_coord = ""
+        new_x_coord = ""
+    
+
+        for i in old_coord[1:]:
+            old_x_coord_list.append(i)
+        for j in old_x_coord_list:
+            old_x_coord += j
+
+        old_x_coord = int(old_x_coord)
+        old_y_coord = old_coord[0].lower()
+
+        for j in new_coord[1:]:
+            new_x_coord_list.append(j)
+        for k in new_x_coord_list:
+            new_x_coord += k
+        
+        new_x_coord = int(new_x_coord)
+        new_y_coord = new_coord[0].lower()
+
+        if old_y_coord in row_char:
+            old_y_index = row_char.index(old_y_coord)
+        else:
+            old_y_index = None
+
+        if new_y_coord in row_char:
+            new_y_index = row_char.index(new_y_coord)
+        else:
+            new_y_index = None
+
+        return [old_x_coord, old_y_coord, old_y_index, new_x_coord, new_y_coord, new_y_index]
 
 
