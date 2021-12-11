@@ -230,4 +230,118 @@ class HasamiShogiGame:
 
         return [old_x_coord, old_y_coord, old_y_index, new_x_coord, new_y_coord, new_y_index]
 
+    def is_skipping_turn(self, old_coord, new_coord):
+        """
+        Takes the old and new coordinates as parameters and checks if the two coordinates are identical.  If so, 
+        it returns True.  Otherwise, it returns False.
+        """
 
+        if old_coord == new_coord:
+            return True
+        else:
+            return False
+
+    def is_outside_board(self, old_coord, new_coord):
+        """
+        Takes old and new coordinates as parameters and checks if the piece is trying to move to or from
+        a place that is not inside the board.  If so, it returns True.  If both locations are within the
+        board, it returns False.
+        """
+        coord = self.slice_coord(old_coord, new_coord)
+        if coord[0] > 9 or coord[1] > "i":
+            return True
+        elif coord[3] > 9 or coord[4] > "i":
+            return True
+        else:
+            return False
+
+    def is_wrong_turn(self, old_coord):
+        """
+        Takes the old coordinate as a parameter and checks if the current player's piece is not in
+        the old coordinate.  If so, the player is trying to move a piece that does not belong to
+        them and it returns True.  Otherwise, it returns False.
+        """
+        if self.get_active_player() == "BLUE":
+            if self.get_square_occupant(old_coord) != "BLUE":
+                return True
+        if self.get_active_player() == "ORANGE":
+            if self.get_square_occupant(old_coord) != "ORANGE":
+                return True
+        
+        return False
+
+    def is_diagonal_move(self, old_coord, new_coord):
+        """
+        Takes old and new coordinates as parameters and checks if the proposed move is diagonal.  If so,
+        it returns True.  If not, it returns False.
+        """
+        coord = self.slice_coord(old_coord, new_coord)
+
+        if coord[0] != coord[3] and coord[1] != coord[4]:
+            return True
+        else:
+            return False
+
+    def is_won(self):
+        """
+        When this method is called, it will check the number of captured pieces for each color
+        and update the current game status accordingly.  It will return True if the game is won
+        and will return False otherwise.
+        """
+        if self.get_num_captured_pieces("BLUE") >= 8:
+            self.set_game_state("blue_won")
+            return True
+
+        elif self.get_num_captured_pieces("ORANGE") >= 8:
+            self.set_game_state("orange_won")
+            return True
+
+        else:
+            self.set_game_state("unfinished")
+            return False
+
+    
+    def is_jumping(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def is_captured(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def scan_left(self, old_coord, new_coord):
+        """ToDo"""
+        
+        pass
+
+    def scan_right(self, old_coord, new_coord):
+        """ToDo"""
+        
+        pass
+
+    def scan_above(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def scan_below(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def scan_corners(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def is_valid(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
+
+    def make_move(self, old_coord, new_coord):
+        """ToDo"""
+
+        pass
