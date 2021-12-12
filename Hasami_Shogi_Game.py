@@ -1,6 +1,7 @@
 # Author: Elliott Larsen
 # Date:
-# Description: 
+# Description: This is a console version of Hasami Shogi.  Please see README.md for more details of the program
+#              and rules of the game.
 
 
 class HasamiShogiGame:
@@ -24,6 +25,8 @@ class HasamiShogiGame:
         self._captured_blue_pieces = 0
         self._captured_orange_pieces = 0
         self._invalid_message = "Invalid Entry"
+        self._blue_won_MSG = "Blue won.  Goodbye!"
+        self._orange_won_MSG = "Orange won.  Goodbye!"
 
     def print_board(self):
         """
@@ -109,7 +112,7 @@ class HasamiShogiGame:
 
     def get_num_captured_pieces(self, piece_color):
         """
-        Takes the color of a piece as a paramter and returns how many pieces of that color have been captured.
+        Takes the color of a piece as a parameter and returns how many pieces of that color have been captured.
         """
 
         piece_color = piece_color.lower()
@@ -232,8 +235,8 @@ class HasamiShogiGame:
 
     def is_skipping_turn(self, old_coord, new_coord):
         """
-        Takes the old and new coordinates as parameters and checks if the two coordinates are identical.  If so, 
-        it returns True.  Otherwise, it returns False.
+        Takes the old and new coordinates as parameters and checks if the two coordinates are identical.  
+        If so, it returns True.  Otherwise, it returns False.
         """
 
         if old_coord == new_coord:
@@ -247,6 +250,7 @@ class HasamiShogiGame:
         a place that is not inside the board.  If so, it returns True.  If both locations are within the
         board, it returns False.
         """
+
         coord = self.slice_coord(old_coord, new_coord)
         if coord[0] > 9 or coord[1] > "i":
             return True
@@ -261,6 +265,7 @@ class HasamiShogiGame:
         the old coordinate.  If so, the player is trying to move a piece that does not belong to
         them and it returns True.  Otherwise, it returns False.
         """
+
         if self.get_active_player() == "BLUE":
             if self.get_square_occupant(old_coord) != "BLUE":
                 return True
@@ -275,6 +280,7 @@ class HasamiShogiGame:
         Takes old and new coordinates as parameters and checks if the proposed move is diagonal.  If so,
         it returns True.  If not, it returns False.
         """
+
         coord = self.slice_coord(old_coord, new_coord)
 
         if coord[0] != coord[3] and coord[1] != coord[4]:
@@ -288,12 +294,13 @@ class HasamiShogiGame:
         and update the current game status accordingly.  It will return True if the game is won
         and will return False otherwise.
         """
+
         if self.get_num_captured_pieces("BLUE") >= 8:
-            self.set_game_state("blue_won")
+            self.set_game_state("orange_won")
             return True
 
         elif self.get_num_captured_pieces("ORANGE") >= 8:
-            self.set_game_state("orange_won")
+            self.set_game_state("blue_won")
             return True
 
         else:
@@ -302,46 +309,347 @@ class HasamiShogiGame:
 
     
     def is_jumping(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters and determines if the proposed move jumps over any piece on
+        the board.  If the move results in a jump, it will return True.  Otherwise, it will return False.
+        """
 
-        pass
+        coord = self.slice_coord(old_coord, new_coord)
+
+        # horizontal jump
+        if coord[1] == coord[4] and coord[0] < coord[3]:
+            for i in self._current_board:
+                if i[0] == coord[1]:
+                    for j in i[coord[0] + 1 : coord[3]]:
+                        if j != ".":
+                            return True
+                    else:
+                        return False
+
+        elif coord[1] == coord[4] and coord[0] > coord[3]:
+            for i in self._current_board:
+                if i[0] == coord[1]:
+                    for j in i[coord[3] + 1 : coord[0]]:
+                        if j != ".":
+                            return True
+                    else:
+                        return False
+
+        # vertical jump
+        elif coord[0] == coord[3] and coord[2] < coord[5]:
+            for i in self._current_board[coord[2] + 2 : coord[5] + 1]:
+                if i[coord[3]] != ".":
+                    return True
+            else:
+                return False
+
+        elif coord[0] == coord[3] and coord[2] > coord[5]:
+            for i in range(coord[5] + 2, coord[2] + 1):
+                if self._current_board[i][coord[3]] != ".":
+                    return True
+            else:
+                return False
+        else:
+            return False
 
     def is_captured(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters and determines if the proposed move results in any capture 
+        by the current player.  It will call five methods that check all four directions plus four corners.
+        Within each method, if the move constitutes a capture, it will increment the number of captured pieces
+        and remove the captured pieces from the board.
+        """
 
-        pass
+        self.scan_left(old_coord, new_coord)
+        self.scan_right(old_coord, new_coord)
+        self.scan_above(old_coord, new_coord)
+        self.scan_below(old_coord, new_coord)
+        self.scan_corners(old_coord, new_coord)
 
     def scan_left(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters.  After a piece is moved to a new location, it scans for any 
+        potential captures to the left of the new square.  If there is any captured pieces, it updates the number
+        of captured pieces and removes the captured pieces.
+        """
         
-        pass
+        coord = self.slice_coord(old_coord, new_coord)
+        enemy_piece = self.get_enemy_piece_color()
+        friendly_piece = self.get_friendly_piece_color()
+        counter = 0
+
+        for i in self._current_board:
+            if i[0] == coord[4]:
+                for j in i[coord[3] - 1 : 0 : -1]:
+                    if j != friendly_piece:
+                        counter += 1
+                        continue
+                    else:
+                        counter += 1
+                        index = int(coord[3] - counter)
+                        for k in i[index + 1 : coord[3]]:
+                            if k == ".":
+                                break
+                        else:
+                            for k in i[index + 1: coord[3]]:
+                                if k == enemy_piece:
+                                    self.set_num_captured_pieces(enemy_piece)
+                                    i[index + 1] = "."
+                                    index += 1
+                        break
 
     def scan_right(self, old_coord, new_coord):
-        """ToDo"""
-        
-        pass
+        """
+        Takes old and new coordinates as parameters.  After a piece is moved to a new location, it scans for any 
+        potential captures to the right of the new square.  If there is any captured pieces, it updates the 
+        number of captured pieces and removes the captured pieces.
+        """
+
+        coord = self.slice_coord(old_coord, new_coord)
+        enemy_piece = self.get_enemy_piece_color()
+        friendly_piece = self.get_friendly_piece_color()
+        counter = 0
+
+        for i in self._current_board:
+            if i[0] == coord[4]:
+                for j in i[coord[3] + 1 : ]:
+                    if j != friendly_piece:
+                        counter += 1
+                        continue
+                    else:
+                        counter += 1
+                        index = int(coord[3] + counter)
+                        for k in i[coord[3] + 1 : index]:
+                            if k == ".":
+                                break
+                        else:
+                            new_x_coord = coord[3] + 1
+                            for k in i[new_x_coord: index]:
+                                if k == enemy_piece:
+                                    self.set_num_captured_pieces(enemy_piece)
+                                    i[new_x_coord] = "."
+                                    new_x_coord += 1
+                        break
 
     def scan_above(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters.  After a piece is moved to a new location, it scans for any 
+        potential captures to the north of the new square.  If there is any captured pieces, it updates the 
+        number of captured pieces and removes the captured pieces.
+        """
 
-        pass
+        coord = self.slice_coord(old_coord, new_coord)
+        enemy_piece = self.get_enemy_piece_color()
+        friendly_piece = self.get_friendly_piece_color()
+        counter = 0
+
+        for i in self._current_board[coord[5] : 0 : -1]:
+            if i[coord[3]] != friendly_piece:
+                counter += 1
+                continue
+            else:
+                counter += 1
+                new_y_index = coord[5]
+                for num in range(counter):
+                    if self._current_board[new_y_index][coord[3]] == ".":
+                        return False
+                    else:
+                        new_y_index -= 1
+                        continue
+
+                new_y_index = coord[5]
+                for num in range(counter):
+                    if self._current_board[new_y_index][coord[3]] == enemy_piece:
+                        self.set_num_captured_pieces(enemy_piece)
+                        self._current_board[new_y_index][coord[3]] = "."
+                        new_y_index -= 1
+                        continue
+                break
 
     def scan_below(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters.  After a piece is moved to a new location, it scans for any
+        potential captures to the south of the new square.  If there is any captured pieces, it updates the 
+        number of captured pieces and removes the captured pieces.
+        """
 
-        pass
+        coord = self.slice_coord(old_coord, new_coord)
+        enemy_piece = self.get_enemy_piece_color()
+        friendly_piece = self.get_friendly_piece_color()
+        counter = 0
+
+        for i in self._current_board[coord[5] + 2:]:
+            if i[coord[3]] != friendly_piece:
+                counter += 1
+                continue
+
+            else:
+                new_y_index = coord[5] + 2
+                for num in range(counter):
+                    if self._current_board[new_y_index][coord[3]] == ".":
+                        return False
+                    else:
+                        new_y_index += 1
+                        continue
+
+                new_y_index = coord[5] + 2
+                for num in range(counter):
+                    if self._current_board[new_y_index][coord[3]] == enemy_piece:
+                        self.set_num_captured_pieces(enemy_piece)
+                        self._current_board[new_y_index][coord[3]] = "."
+                        new_y_index += 1
+                        continue
+                break
 
     def scan_corners(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes old and new coordinates as parameters.  After a piece is moved to one of the eight squares that can
+        capture a piece in the nearest corner, it scans various conditions to check if the move constitutes a
+        capture.  If so, it updates the number of captured pieces and removes the captured corner piece.
+        """
 
-        pass
+        enemy_piece_color = self.get_enemy_piece_color()
+        enemy_piece = self.get_enemy_player()
+
+        if new_coord == "h1" or new_coord == "i2":
+            if self.get_square_occupant("h1") == self.get_square_occupant("i2"):
+                if self.get_square_occupant("i1") == enemy_piece:
+                    self.set_num_captured_pieces(enemy_piece_color)
+                    self.set_square_occupant("i1", ".")
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+        elif new_coord == "i8" or new_coord == "h9":
+            if self.get_square_occupant("i8") == self.get_square_occupant("h9"):
+                if self.get_square_occupant("i9") == enemy_piece:
+                    self.set_num_captured_pieces(enemy_piece_color)
+                    self.set_square_occupant("i9", ".")
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+        elif new_coord == "a8" or new_coord == "b9":
+            if self.get_square_occupant("a8") == self.get_square_occupant("b9"):
+                if self.get_square_occupant("a9") == enemy_piece:
+                    self.set_num_captured_pieces(enemy_piece_color)
+                    self.set_square_occupant("a9", ".")
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+        elif new_coord == "a2" or new_coord == "b1":
+            if self.get_square_occupant("a2") == self.get_square_occupant("b1"):
+                if self.get_square_occupant("a1") == enemy_piece:
+                    self.set_num_captured_pieces(enemy_piece_color)
+                    self.set_square_occupant("a1", ".")
+                    return True
+                else:
+                    return False
+            else:
+                return False
 
     def is_valid(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes the old and new coordinates as two parameters.  The method will check the proposed move against 
+        various conditions and return True if it is a valid move.  Otherwise, it will return False.
+        """
 
-        pass
+        # no skipping turns allowed
+        if self.is_skipping_turn(old_coord, new_coord) is True:
+            return False
+
+        # if the piece is trying to move from or to a location outside of the board.
+        elif self.is_outside_board(old_coord, new_coord) is True:
+            return False
+
+        # if moving from an empty square
+        elif self.get_square_occupant(old_coord) == "NONE":
+            return False
+
+        # if it is a wrong player’s turn.
+        elif self.is_wrong_turn(old_coord) is True:
+            return False
+
+        # no diagonal moves allowed
+        elif self.is_diagonal_move(old_coord, new_coord) is True:
+            return False
+
+        # if there is already a piece in the new location
+        elif self.get_square_occupant(new_coord) != "NONE":
+            return False
+
+        # if the game is already won
+        elif self.is_won() is True:
+            return False
+
+        # if the piece is trying to jump another piece.
+        elif self.is_jumping(old_coord, new_coord) is True:
+            return False
+
+        else:
+            return True
 
     def make_move(self, old_coord, new_coord):
-        """ToDo"""
+        """
+        Takes the old and new coordinates on the board as parameters.  If the move is not legal, it will return
+        False.  Otherwise, it will call self.is_captured() to see if there are any pieces to be caught.  It will
+        then update the board, switch the turn and return True.
+        """
 
-        pass
+        if self.is_valid(old_coord, new_coord) is False:
+            print(self._invalid_message)
+            return False
+
+        elif self.get_active_player() == "BLUE":
+            self.set_square_occupant(old_coord, ".")
+            self.set_square_occupant(new_coord, "B")
+            self.is_captured(old_coord, new_coord)
+            self.switch_active_player()
+            self.is_won()
+            return True
+
+        elif self.get_active_player() == "ORANGE":
+            self.set_square_occupant(old_coord, ".")
+            self.set_square_occupant(new_coord, "O")
+            self.is_captured(old_coord, new_coord)
+            self.switch_active_player()
+            self.is_won()
+            return True
+
+        else:
+            return self._invalid_message
+
+    def play(self, old_coord, new_coord):
+        """ 
+        Takes the old and new coordinates on the board as parameters.  As the move is validated/made, it shows the
+        user the current state of the board and the game including number of captured pieces for each color. 
+        """
+
+        make_move_result = self.make_move(old_coord, new_coord)
+        blue_captured = self.get_num_captured_pieces("BLUE")
+        orange_captured = self.get_num_captured_pieces("ORANGE")
+
+        if self.is_won() is True:
+            if self.get_game_state() == "BLUE_WON":
+                self.print_board()
+                print(f"\n{orange_captured} Orange Pieces Have Been Captured." )
+                print("Blue Won.  Goodbye!\n")
+            else:
+                self.print_board()
+                print(f"\n{blue_captured} Blue Pieces Have Been Captured.")
+                print("Orange Won.  Goodbye!\n")
+                
+        else:
+            if make_move_result is True:
+                #self.make_move(old_coord, new_coord)
+                self.print_board()
+                print(f"\n{blue_captured} Blue Pieces Have Been Captured.")
+                print(f"{orange_captured} Orange Pieces Have Been Captured.\n" )
+
