@@ -1,5 +1,5 @@
 # Author: Elliott Larsen
-# Date:
+# Date: 12/12/2021
 # Description: This is a console version of Hasami Shogi.  Please see README.md for more details of the program
 #              and rules of the game.
 
@@ -307,7 +307,6 @@ class HasamiShogiGame:
             self.set_game_state("unfinished")
             return False
 
-    
     def is_jumping(self, old_coord, new_coord):
         """
         Takes old and new coordinates as parameters and determines if the proposed move jumps over any piece on
@@ -604,7 +603,11 @@ class HasamiShogiGame:
         """
 
         if self.is_valid(old_coord, new_coord) is False:
+            print()
             print(self._invalid_message)
+            print()
+            self.print_board()
+            print()
             return False
 
         elif self.get_active_player() == "BLUE":
