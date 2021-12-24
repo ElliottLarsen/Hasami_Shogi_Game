@@ -21,6 +21,7 @@ Here is a simple example of how the game can be played:
 
 ```python
 hsg = HasamiShogiGame()
+#hsg.play(oldCoordinate, newCoordinate)
 hsg.play("i1", "b1")
 hsg.play("a9", "h9")
 ```
