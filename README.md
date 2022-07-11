@@ -1,10 +1,8 @@
 # Hasami Shogi Game 
 This is a console version of Hasami Shogi written in Python.  It follows the rules for "Variant 1" found [HERE](https://en.wikipedia.org/wiki/Hasami_shogi).  Blue(B) and Orange(O) pieces are used and the Blue player must make the first move.  
 ## Technologies
----
 * Python
 ## Game Walkthrough
----
 This is the initial board configuration:
 ```
   1 2 3 4 5 6 7 8 9
@@ -41,7 +39,6 @@ i . B B B B B B B B
 0 Orange Pieces Have Been Captured.
 ```
 ## Contact
----
 Elliott Larsen
 
 * Email elliottlrsn@gmail.com
