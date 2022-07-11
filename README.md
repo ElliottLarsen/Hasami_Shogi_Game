@@ -44,7 +44,3 @@ Elliott Larsen
 * Email elliottlrsn@gmail.com
 * GitHub [@elliottlarsen](https://github.com/elliottlarsen)
 * LinkedIn [@elliottlarsen](https://www.linkedin.com/in/elliottlarsen)
-
-
-<br>
-<h3 align = "right"> Elliott Larsen </h3>
